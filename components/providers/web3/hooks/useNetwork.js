@@ -10,13 +10,16 @@ const NETWORKS = {
   1337: "Ganashe",
 };
 
-const tergetNetwork = NETWORKS[process.env.NEXT_PUBLIC_TARGET_CHAIN_ID]
+const targetNetwork = NETWORKS[process.env.NEXT_PUBLIC_TARGET_CHAIN_ID];
 
 export const handler = (web3, provider) => () => {
-  const { data, mutate, ...rest } = useSWR(web3 ? "web/network" : null, async () => {
-    const chainId = await web3.eth.getChainId();
-    return NETWORKS[chainId];
-  });
+  const { data, mutate, ...rest } = useSWR(
+    web3 ? "web/network" : null,
+    async () => {
+      const chainId = await web3.eth.getChainId();
+      return NETWORKS[chainId];
+    }
+  );
 
   useEffect(() => {
     provider &&
@@ -28,8 +31,8 @@ export const handler = (web3, provider) => () => {
   return {
     data,
     mutate,
-    target: tergetNetwork,
-    isSupported: data === tergetNetwork,
+    target: targetNetwork,
+    isSupported: data === targetNetwork,
     ...rest,
   };
 };

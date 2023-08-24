@@ -1,38 +1,31 @@
 import { CourseCard, CourseList } from "@components/ui/course";
 import { BaseLayout } from "@components/ui/layout";
 import { getAllCourses } from "@content/courses/fetcher";
-import { WalletBar } from "@components/ui/web3";
-import { useAccount, useNetwork } from "@components/hooks/web3";
+import { useWalletInfo } from "@components/hooks/web3";
 import { Button } from "@components/ui/common";
 import { OrderModal } from "@components/ui/order";
 import { useState } from "react";
+import { MarketHeader } from "@components/ui/marketplace";
 
 export default function Marketplace({ courses }) {
   const [selectedCourse, setSelectedCourse] = useState(null);
-  const { account } = useAccount();
-  const { network } = useNetwork();
+  const { canOrderCourse } = useWalletInfo();
 
   return (
     <>
       <div className="py-4">
-        <WalletBar
-          address={account.data}
-          network={{
-            data: network.data,
-            target: network.target,
-            isSupported: network.isSupported,
-            hasInitialResponse: network.hasInitialResponse,
-          }}
-        />
+        <MarketHeader />
       </div>
       <CourseList courses={courses}>
         {(course) => (
           <CourseCard
             key={course.id}
             course={course}
+            disabled={!canOrderCourse}
             Footer={() => (
               <div className="mt-4">
                 <Button
+                  disabled={!canOrderCourse}
                   onClick={() => setSelectedCourse(course)}
                   variant="lightPurple"
                 >
