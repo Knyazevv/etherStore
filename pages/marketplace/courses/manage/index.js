@@ -7,7 +7,7 @@ export default function ManageCourses() {
     <>
       <MarketHeader />
       <section className="grid grid-cols-1">
-        {/* <OwnedCourseCard /> */}
+        <OwnedCourseCard />
       </section>
     </>
   );

@@ -7,7 +7,7 @@ const NETWORKS = {
   59144: "Linea Test Network",
   5: "Rinkeby Test Network",
   42: "Koven Test Network",
-  1337: "Ganashe",
+  1337: "Ganache",
 };
 
 const targetNetwork = NETWORKS[process.env.NEXT_PUBLIC_TARGET_CHAIN_ID];
