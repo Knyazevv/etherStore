@@ -5,27 +5,34 @@ import { useEffect, useState } from "react";
 const defaultOrder = {
   price: "",
   email: "",
-  confirmEmail: ""
-}
+  confirmEmail: "",
+};
 
-const _createFormState = (isDisabled = false, message = "") => ({isDisabled, message}) 
-const createFormState = ({price, email, confirmEmail}) => {
-  if(!price || Number(price) <= 0){
-    return _createFormState(true, "Price is not valid.")
-  }
-  else if(confirmEmail.length === 0 || email.length === 0){
-    return _createFormState(true)
-  }
-  else if(email !== confirmEmail){
-    return _createFormState(true, "Email must be equal.")
+const _createFormState = (isDisabled = false, message = "") => ({
+  isDisabled,
+  message,
+});
+const createFormState = ({ price, email, confirmEmail, hasAgreedTOS }) => {
+  if (!price || Number(price) <= 0) {
+    return _createFormState(true, "Price is not valid.");
+  } else if (confirmEmail.length === 0 || email.length === 0) {
+    return _createFormState(true);
+  } else if (email !== confirmEmail) {
+    return _createFormState(true, "Email must be equal.");
+  } else if (!hasAgreedTOS) {
+    return _createFormState(
+      true,
+      "You need to agree with terms of service in order to submit the form"
+    );
   }
   return _createFormState();
-} 
+};
 
-export default function OrderModal({ course, onClose }) {
+export default function OrderModal({ course, onClose, onSubmit }) {
   const [isOpen, setIsOpen] = useState(false);
   const [order, setOrder] = useState(defaultOrder);
   const [enablePrice, setEnablePrice] = useState(false);
+  const [hasAgreedTOS, setHasAgreedTOS] = useState(false);
   const { eth } = useEthPrice();
 
   useEffect(() => {
@@ -33,18 +40,20 @@ export default function OrderModal({ course, onClose }) {
       setIsOpen(true);
       setOrder({
         ...defaultOrder,
-        price: eth.perItem
-      })
+        price: eth.perItem,
+      });
     }
   }, [course]);
 
   const closeModal = () => {
     setIsOpen(false);
-    setOrder(defaultOrder)
+    setOrder(defaultOrder);
+    setEnablePrice(false);
+    setHasAgreedTOS(false);
     onClose();
   };
 
-  const formState = createFormState(order);
+  const formState = createFormState(order, hasAgreedTOS);
 
   return (
     <Modal isOpen={isOpen}>
@@ -63,16 +72,18 @@ export default function OrderModal({ course, onClose }) {
                 <label className="mb-2 font-bold">Price(eth)</label>
                 <div className="text-xs text-gray-700 flex">
                   <label className="flex items-center mr-2">
-                    <input 
-                    checked={enablePrice}
-                    onChange={({target: {checked}}) => {
-                      setOrder({
-                        ...order,
-                        price: checked ? order.price : eth.perItem
-                      })
-                      setEnablePrice(checked)
-                    }}
-                    type="checkbox" className="form-checkbox" />
+                    <input
+                      checked={enablePrice}
+                      onChange={({ target: { checked } }) => {
+                        setOrder({
+                          ...order,
+                          price: checked ? order.price : eth.perItem,
+                        });
+                        setEnablePrice(checked);
+                      }}
+                      type="checkbox"
+                      className="form-checkbox"
+                    />
                   </label>
                   <span>Adjust Price - only when the price is not correct</span>
                 </div>
@@ -80,12 +91,14 @@ export default function OrderModal({ course, onClose }) {
               <input
                 disabled={!enablePrice}
                 value={order.price}
-                onChange={({target: {value}}) => {
-                  if(isNaN(value)){return}
+                onChange={({ target: { value } }) => {
+                  if (isNaN(value)) {
+                    return;
+                  }
                   setOrder({
                     ...order,
-                    price: value
-                  })
+                    price: value,
+                  });
                 }}
                 type="text"
                 name="price"
@@ -102,12 +115,12 @@ export default function OrderModal({ course, onClose }) {
                 <label className="mb-2 font-bold">Email</label>
               </div>
               <input
-              onChange={({target: {value}}) => {
-                setOrder({
-                  ...order,
-                  email: value.trim()
-                })
-              }}
+                onChange={({ target: { value } }) => {
+                  setOrder({
+                    ...order,
+                    email: value.trim(),
+                  });
+                }}
                 type="email"
                 name="email"
                 id="email"
@@ -124,12 +137,12 @@ export default function OrderModal({ course, onClose }) {
                 <label className="mb-2 font-bold">Repeat Email</label>
               </div>
               <input
-               onChange={({target: {value}}) => {
-                setOrder({
-                  ...order,
-                  confirmEmail: value.trim()
-                })
-              }}
+                onChange={({ target: { value } }) => {
+                  setOrder({
+                    ...order,
+                    confirmEmail: value.trim(),
+                  });
+                }}
                 type="email"
                 name="confirmEmail"
                 className="w-80 focus:ring-indigo-500 shadow-md focus:border-indigo-500 block pl-7 p-4 sm:text-sm border-gray-300 rounded-md"
@@ -138,7 +151,14 @@ export default function OrderModal({ course, onClose }) {
             </div>
             <div className="text-xs text-gray-700 flex">
               <label className="flex items-center mr-2">
-                <input type="checkbox" className="form-checkbox" />
+                <input
+                  checked={hasAgreedTOS}
+                  onChange={({ target: { checked } }) => {
+                    setHasAgreedTOS(checked);
+                  }}
+                  type="checkbox"
+                  className="form-checkbox"
+                />
               </label>
               <span>
                 I accept Eincode &apos;terms of service&apos; and I agree that
@@ -146,17 +166,22 @@ export default function OrderModal({ course, onClose }) {
                 correct
               </span>
             </div>
-            {formState.message && 
-              <div className="p-4 text-red-700 bg-red">{formState.message}</div>
-            }
+            {formState.message && (
+              <div className="p-4 my-3 text-yellow-700 bg-yellow-200 rounded-lg text-sm">
+                {formState.message}
+              </div>
+            )}
           </div>
         </div>
         <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex">
-          <Button disabled={formState.isDisabled}
+          <Button
+            disabled={formState.isDisabled}
             onClick={() => {
-              alert(JSON.stringify(order))
+              onSubmit(order);
             }}
-          >Submit</Button>
+          >
+            Submit
+          </Button>
           <Button onClick={closeModal} variant="red">
             Cancel
           </Button>
