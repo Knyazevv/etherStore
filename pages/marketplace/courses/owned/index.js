@@ -8,13 +8,10 @@ export default function OwnedCourses() {
     <>
       <MarketHeader />
       <section className="grid grid-cols-1">
-        {/* <CourseCard>
+        {/* <CourseCard> */}
           <Message>My custom message!</Message>
           <Button>Watch the course</Button>
-        </CourseCard> */}
-
-      <Message>My custom message!</Message>
-      <Button>Watch the course</Button>
+        {/* </CourseCard> */}
       </section>
     </>
   );
